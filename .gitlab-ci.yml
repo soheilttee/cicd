@@ -1,0 +1,8 @@
+stages:
+  - build
+  - deploy
+
+include:
+  - local: 'dev-template.yml'
+#  - local: 'stage-template.yml'
+#  - local: 'prod-template.yml'
