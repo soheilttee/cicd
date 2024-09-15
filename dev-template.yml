@@ -1,0 +1,30 @@
+Build_service_Dev:
+  stage: build
+  before_script:
+    - export APP_VER=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
+    - export APP_NAME=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="artifactId"]/text()' pom.xml)
+    - export NEXUS_USER=${NEXUS_USER}
+    - export NEXUS_PASS=${NEXUS_PASS}
+  script:
+    - docker build --add-host nexus.ernyka.com:192.168.0.1 --build-arg NEXUS_USER --build-arg NEXUS_PASS --build-arg APP_NAME --build-arg APP_VER -t service:${CI_PIPELINE_ID} .
+  only:
+    - dev
+  tags:
+    - dev-service
+
+Deploy_service_Dev:
+  environment:
+    name: dev
+  stage: deploy
+  before_script:
+    - env | grep 'DEV_' | sed 's/DEV_//' > .env
+    - echo "DEPLOY_NAME=dev" >> .env
+    - echo "IMAGE_TAG=${CI_PIPELINE_ID}" >> .env
+    - cat .env
+  script:
+    - docker-compose up -d
+  only:
+    - dev
+  tags:
+    - dev-service
+
